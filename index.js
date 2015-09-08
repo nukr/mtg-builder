@@ -58,7 +58,7 @@ async () => {
         return r.db('mtg').table('cards').insert(card)
       })
       await Promise.all(cardsInsertQuery)
-      delete allSetJson[set]['code']
+      delete allSetJson[set]['cards']
       await r.db('mtg').table('sets').insert(allSetJson[set])
     }
 

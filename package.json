@@ -1,0 +1,15 @@
+{
+  "name": "mtg-builder",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "babel-node --stage 0 index"
+  },
+  "standard": {
+    "parser": "babel-eslint"
+  },
+  "author": "nukr",
+  "license": "MIT"
+}

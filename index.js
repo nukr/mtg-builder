@@ -1,11 +1,10 @@
-import fs from 'fs'
 import rethinkdbdash from 'rethinkdbdash'
 import oboe from 'oboe'
 import config from './config'
 
 let r = rethinkdbdash(config.rethinkdb)
 
-function getJSON (url) {
+function downloadJSON (url) {
   return new Promise((resolve, reject) => {
     oboe(url).done(resolve).fail(reject)
   })
@@ -21,17 +20,7 @@ function createTable (dbName, tableName) {
   )
 }
 
-function readFile () {
-  return new Promise((resolve, reject) => {
-    fs.readFile('./AllSets-x.json', {encoding: 'utf8'}, (err, data) => {
-      if (err) reject(err)
-      let json = JSON.parse(data)
-      resolve(json)
-    })
-  })
-}
-
-async () => {
+;(async () => {
   await r.branch(
     r.dbList().contains('mtg'),
     r.db('rethinkdb').table('db_config').filter({name: 'mtg'}).nth(0),
@@ -41,17 +30,10 @@ async () => {
   await createTable('mtg', 'cards')
   await createTable('mtg', 'sets')
 
-  let allSetJson = await getJSON('http://mtgjson.com/json/AllSets-x.json')
+  let allSetJson = await downloadJSON('http://mtgjson.com/json/AllSets-x.json')
   let fns = []
 
   for (let set in allSetJson) {
-    // allSetJson[set][name]
-    // allSetJson[set][code]
-    // allSetJson[set][releaseDate]
-    // allSetJson[set][border]
-    // allSetJson[set][type]
-    // allSetJson[set][cards]
-
     let fn = async () => {
       let cardsInsertQuery = allSetJson[set]['cards'].map(card => {
         card.code = allSetJson[set]['code']
@@ -72,4 +54,4 @@ async () => {
   }
 
   r.getPoolMaster().drain()
-}().catch(console.log)
+})().catch(console.log)

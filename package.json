@@ -5,11 +5,15 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "babel-node --stage 0 index"
+    "start": "babel-node index"
   },
   "standard": {
     "parser": "babel-eslint"
   },
   "author": "nukr",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "babel-preset-es2015": "^6.1.18",
+    "babel-preset-stage-0": "^6.1.18"
+  }
 }

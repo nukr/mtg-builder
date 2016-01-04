@@ -1,0 +1,9 @@
+builer:
+  build: .
+  links:
+    - "rethinkdb:rethinkdb"
+
+rethinkdb:
+  image: rethinkdb
+  volumes:
+    - "./data:/data"

@@ -1,8 +1,7 @@
 import rethinkdbdash from 'rethinkdbdash'
 import oboe from 'oboe'
 import config from './config'
-
-let r = rethinkdbdash(config.rethinkdb)
+import getLatestVersion from './get-latest-version'
 
 function downloadJSON (url) {
   return new Promise((resolve, reject) => {
@@ -10,7 +9,7 @@ function downloadJSON (url) {
   })
 }
 
-function createTable (dbName, tableName) {
+function createTable (dbName, tableName, r) {
   return r.branch(
     r.db(dbName).tableList().contains(tableName),
     r.db(dbName).table(tableName).delete().do(() => {
@@ -20,15 +19,41 @@ function createTable (dbName, tableName) {
   )
 }
 
-;(async () => {
+export default async () => {
+  let r = rethinkdbdash(config.rethinkdb)
+  console.log('start building mtg database')
+  let latestVersion = await getLatestVersion()
+  console.log(`latestVersion is ${latestVersion}`)
+
+  let currentVersion = await r.branch(
+    r.dbList().contains('mtg'),
+    r.branch(
+      r.db('mtg').tableList().contains('info'),
+      r.db('mtg').table('info').get('version')('value').default(null),
+      null
+    ),
+    null
+  )
+  console.log(`currentVersion is ${currentVersion}`)
+
+  // 1. 檢查版本：將最新的版本與本地的版本比對
+  if (latestVersion === currentVersion) {
+    // 2. 相同：啥事都不做
+    console.log('This is latest version')
+    return r.getPoolMaster().drain()
+  }
+
+  // 3. 不同：整個毀掉重建
+  console.log('building database')
   await r.branch(
     r.dbList().contains('mtg'),
     r.db('rethinkdb').table('db_config').filter({name: 'mtg'}).nth(0),
     r.dbCreate('mtg')('config_changes').nth(0)('new_val')
   )
 
-  await createTable('mtg', 'cards')
-  await createTable('mtg', 'sets')
+  await createTable('mtg', 'cards', r)
+  await createTable('mtg', 'sets', r)
+  await createTable('mtg', 'info', r)
 
   let allSetJson = await downloadJSON('http://mtgjson.com/json/AllSets-x.json')
   let fns = []
@@ -53,5 +78,10 @@ function createTable (dbName, tableName) {
     console.log(`await fns[${i}] end`)
   }
 
+  await r.db('mtg').table('info').insert({
+    id: 'version',
+    value: latestVersion
+  })
+
   r.getPoolMaster().drain()
-})().catch(console.log)
+}

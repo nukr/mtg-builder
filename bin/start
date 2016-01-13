@@ -1,3 +1,10 @@
 #!/bin/bash
 
-node babel-register.js
+if [ -z "${NODE_ENV}" ] || [ "${NODE_ENV}" == "development" ]; then
+    export NODE_ENV=development
+    pm2 start app.json --no-daemon
+else
+    if [ "${NODE_ENV}" == "production" ]; then
+        node ./babel-register.js
+    fi
+fi

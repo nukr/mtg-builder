@@ -1,0 +1,8 @@
+{
+  "name": "dal-api",
+  "script": "babel-register.js",
+  "watch": ["src"],
+  "watch_options": {
+    "usePolling": true
+  }
+}

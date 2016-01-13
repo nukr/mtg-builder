@@ -1,9 +1,8 @@
 builer:
   build: .
   links:
-    - "rethinkdb:rethinkdb"
-
+    - rethinkdb
+  volumes:
+    - "./src:/opt/app/src"
 rethinkdb:
   image: rethinkdb
-  volumes:
-    - "./data:/data"

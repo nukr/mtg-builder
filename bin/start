@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 if [ -z "${NODE_ENV}" ] || [ "${NODE_ENV}" == "development" ]; then
     export NODE_ENV=development

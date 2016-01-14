@@ -1,4 +1,4 @@
-FROM node:5.2.0
+FROM nukr/alpine-node:5.4.1
 MAINTAINER nukr <nukrs.w@gmail.com>
 
 COPY package.json /tmp/package.json
